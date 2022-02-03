@@ -1,14 +1,39 @@
 version: "3.2"
 services:
-  app:
-    command: node src/server.js
+  svc_auth:
     build:
-      context: .
+      context: ./svc_auth
       dockerfile: Dockerfile
     ports:
       - published: ${APP_PORT:-3000}
         target: 3000
     volumes:
-      - .:/app/
+      - ./svc_auth:/app
+      - /app/node_modules
     environment:
       JWT_SECRET: ${JWT_SECRET}
+      PORT: 3000
+
+  svc_movie:
+    build:
+      context: ./svc_movie
+      dockerfile: Dockerfile
+    ports:
+      - published: ${APP_PORT:-8000}
+        target: 8000
+    volumes:
+      - ./svc_movie:/app
+      - /app/node_modules
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      MOVIES_LIMIT: 5
+      DATABASE: mongodb://mongo:27017/svc_movie
+      APP_PORT: 8000
+    links:
+      - mongo
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:8001"

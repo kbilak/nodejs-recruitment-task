@@ -11,7 +11,6 @@ if (!JWT_SECRET) {
 
 const auth = authFactory(JWT_SECRET);
 const app = express();
-
 app.use(bodyParser.json());
 
 app.post("/auth", (req, res, next) => {
@@ -24,16 +23,13 @@ app.post("/auth", (req, res, next) => {
   if (!username || !password) {
     return res.status(400).json({ error: "invalid payload" });
   }
-
   try {
     const token = auth(username, password);
-
     return res.status(200).json({ token });
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(401).json({ error: error.message });
     }
-
     next(error);
   }
 });
@@ -43,10 +39,11 @@ app.use((error, _, res, __) => {
     `Error processing request ${error}. See next message for details`
   );
   console.error(error);
-
   return res.status(500).json({ error: "internal server error" });
 });
 
 app.listen(PORT, () => {
   console.log(`auth svc running at port ${PORT}`);
 });
+
+export default app
